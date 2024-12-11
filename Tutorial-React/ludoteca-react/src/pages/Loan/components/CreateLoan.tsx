@@ -1,5 +1,6 @@
 import { ChangeEvent, useState , useEffect} from "react";
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -23,7 +24,7 @@ interface Props {
   closeModal: () => void;
   create: (loan: Loan) => void; 
 }
-
+const today = dayjs();
 const initialState: {
   id: string;
   gameId: Game | undefined;
@@ -34,7 +35,7 @@ const initialState: {
   id : "",
   gameId: undefined,
   clientId: undefined,
-  startDate: dayjs(''),
+  startDate: today,
   endDate: dayjs(''),
 };
 
@@ -50,7 +51,7 @@ export default function CreateLoan(props: Props) {
       id: props.loan?.id || "",
       game: props.loan?.game,
       client: props.loan?.client,
-      startDate: props.loan?.startDate || dayjs(''),
+      startDate: props.loan?.startDate || today,
       endDate: props.loan?.endDate || dayjs(''),
     });
   }, [props?.loan]);
@@ -81,6 +82,7 @@ export default function CreateLoan(props: Props) {
     form.game &&
     form.client &&
     form.startDate &&
+    form.startDate > today.subtract(1, "day") &&
     form.endDate &&
     form.endDate > form.startDate &&
     isDateRangeValid;
@@ -135,17 +137,20 @@ export default function CreateLoan(props: Props) {
               </MenuItem>
             ))}
           </TextField>
-          <DatePicker
-            label="Fecha de Inicio"
-            value={form.startDate}
-            onChange={(date) => handleDateChange("startDate", date)}
-          />
-          <DatePicker
-            label="Fecha de Fin"
-            value={form.endDate}
-            onChange={(date) => handleDateChange("endDate", date)}
-          />
-          {!isDateRangeValid && (
+          <Box sx={{ mt: 2 }}>
+            <DatePicker
+              label="Fecha de Inicio"
+              value={form.startDate}
+              onChange={(date) => handleDateChange("startDate", date)}
+            />
+            <DatePicker
+              label="Fecha de Fin"
+              value={form.endDate}
+              onChange={(date) => handleDateChange("endDate", date)}
+            />
+          </Box>
+
+          {form.endDate.isValid()&&!isDateRangeValid && (
             <p style={{ color: "red" }}>
               El periodo de préstamo no puede ser mayor a 14 días.
             </p>
